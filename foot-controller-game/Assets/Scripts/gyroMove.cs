@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO.Ports;
 
 public class gyroMove : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class gyroMove : MonoBehaviour
     public string[] strData = new string[4]; //4 inputs
     public string[] strData_received = new string[4];
     public float qw, qx, qy, qz, ax, ay, az;
+
+    SerialPort stream = new SerialPort("COM4", 115200);
 
     
     public float speed;
@@ -22,16 +25,21 @@ public class gyroMove : MonoBehaviour
     void Start()
     {
         serialController = GameObject.Find("SerialController").GetComponent<SerialController>();
+        stream.Open();
     }
 
     // Update is called once per frame
     void Update()
     {
         //reading the data
-        message = serialController.ReadSerialMessage();
+        //message = serialController.ReadSerialMessage();
 
         //split any commas
+        //strData = message.Split(',');
+
+        message = stream.ReadLine();
         strData = message.Split(',');
+
         if (strData[0] != "" && strData[1] != "" && strData[2] != "" && strData[3] != "")//make sure data are ready, not empty
         {
             //copy to received data

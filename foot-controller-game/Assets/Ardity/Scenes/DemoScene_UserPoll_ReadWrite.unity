@@ -284,6 +284,10 @@ PrefabInstance:
       propertyPath: portName
       value: COM4
       objectReference: {fileID: 0}
+    - target: {fileID: 11442534, guid: a65acf0cbf56b80419f74ebf0bc845f4, type: 3}
+      propertyPath: messageListener
+      value: 
+      objectReference: {fileID: 1952151062}
     m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: a65acf0cbf56b80419f74ebf0bc845f4, type: 3}
@@ -496,13 +500,7 @@ MonoBehaviour:
   - 
   - 
   - 
-  - 
-  - 
-  - 
   strData_received:
-  - 
-  - 
-  - 
   - 
   - 
   - 
