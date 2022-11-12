@@ -9,7 +9,15 @@ public class gyroMove : MonoBehaviour
     string message;
     public string[] strData = new string[4]; //4 inputs
     public string[] strData_received = new string[4];
-    public float qw, qx, qy, qz;
+    public float qw, qx, qy, qz, ax, ay, az;
+
+    
+    public float speed;
+
+    float curr_offset_x = 0;
+    float curr_offset_y = 0.961f;
+    float curr_offset_z = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -31,16 +39,38 @@ public class gyroMove : MonoBehaviour
             strData_received[1] = strData[1];
             strData_received[2] = strData[2];
             strData_received[3] = strData[3];
+            /* strData_received[4] = strData[4];
+            strData_received[5] = strData[5];
+            strData_received[6] = strData[6]; */
          
             //convert to floats from the received strings
             qw = float.Parse(strData_received[0]);
             qx = float.Parse(strData_received[1]);
             qy = float.Parse(strData_received[2]);
             qz = float.Parse(strData_received[3]);
-      
+           /*  ax = float.Parse(strData_received[4]);
+            ay = float.Parse(strData_received[5]);
+            az = float.Parse(strData_received[6]); */
+
+
             //set our own rotation to be equal to a quaternion defined by these new values
-            transform.rotation = new Quaternion(-qy, -qz, qx, qw);
-    
+            //reverse left/right and up/down
+            //transform.rotation = new Quaternion(-qy, -qz, qx, qw);
+             transform.rotation = new Quaternion(-qx, -qz, -qy, qw);
+
+             //movement
+             // prevent 
+           /*  if (Mathf.Abs(ax) - 1 < 0) ax = 0;
+            if (Mathf.Abs(ay) - 1 < 0) ay = 0;
+            if (Mathf.Abs(az) - 1 < 0) az = 0; */
+
+            
+            /* curr_offset_x += qx;
+            curr_offset_y += 0;
+            curr_offset_z +=qy; // The IMU module have value of z axis of 16600 caused by gravity */
+
+            transform.position += new Vector3(qy, 0, qx)*speed;
+
         }   
     }
 }

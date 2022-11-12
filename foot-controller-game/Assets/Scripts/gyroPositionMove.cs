@@ -11,10 +11,14 @@ public class gyroPositionMove : MonoBehaviour
     public string[] strData_received = new string[4];
     public float qw, qx, qy, qz;
     private float movement = 5f;
+
+
+    public float speed;
     // Start is called before the first frame update
     void Start()
     {
         serialController = GameObject.Find("SerialController").GetComponent<SerialController>();
+        
     }
 
     // Update is called once per frame
@@ -41,21 +45,23 @@ public class gyroPositionMove : MonoBehaviour
 
             //set position to the defined values that occur when controller moves 
 
+
+            //want velocity based instead
             if (qx > 0)
             {
-                transform.position = new Vector3(qx, 0, 0);
+                transform.position += new Vector3(speed, 0, 0);
             }
             if (qx < 0)
             {
-                transform.position = new Vector3(-qx, 0, 0);
+                transform.position += new Vector3(-speed, 0, 0);
             }
             if (qy > 0)
             {
-                transform.position = new Vector3(0, qy, 0);
+                transform.position += new Vector3(0, speed, 0);
             }
             if (qy < 0)
             {
-                transform.position = new Vector3(0, -qy, 0);
+                transform.position += new Vector3(0, -speed, 0);
             }
 
         }
