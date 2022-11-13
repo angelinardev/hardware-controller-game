@@ -7,7 +7,10 @@
 //		   - and altered FIFO retrieval sequence to avoid using blocking code
 //      2016-04-18 - Eliminated a potential infinite loop
 //      2013-05-08 - added seamless Fastwire support
-//                 - added note about gyro calibration
+//                 - added note about gyd Yaw/Pitch/Roll output formats
+//      2012-06-04 - remove accel offset clearing for better results (thanks Sungon Lee)
+//      2012-06-01 - fixed gyro sensitivity to be 2000 deg/sec instead of 250
+//      2012-05-30 - basic DMP iro calibration
 //      2012-06-21 - added note about Arduino 1.0.1 + Leonardo compatibility error
 //      2012-06-20 - improved FIFO overflow handling and simplified read process
 //      2012-06-19 - completely rearranged DMP initialization code and simplification
@@ -15,10 +18,7 @@
 //      2012-06-09 - fix broken FIFO read sequence and change interrupt detection to RISING
 //      2012-06-05 - add gravity-compensated initial reference frame acceleration output
 //                 - add 3D math helper file to DMP6 example sketch
-//                 - add Euler output and Yaw/Pitch/Roll output formats
-//      2012-06-04 - remove accel offset clearing for better results (thanks Sungon Lee)
-//      2012-06-01 - fixed gyro sensitivity to be 2000 deg/sec instead of 250
-//      2012-05-30 - basic DMP initialization working
+//                 - add Euler output annitialization working
 
 /* ============================================
 I2Cdev device library code is placed under the MIT license
@@ -259,6 +259,9 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
           //  Serial.print("quat\t");
           //CHANGE, USING QUATERNION
+          //adjust for offset
+          //q.w -=1.0;
+          //q.z += 0.01;
             Serial.print(q.w);
             Serial.print(",");
             Serial.print(q.x);
@@ -342,6 +345,6 @@ void loop() {
         digitalWrite(LED_PIN, blinkState);
 
         //for unity, less data
-        delay(200);
+        delay(50);
     }
 }

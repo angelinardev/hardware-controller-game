@@ -12,7 +12,7 @@ public class gyroMove : MonoBehaviour
     public string[] strData_received = new string[4];
     public float qw, qx, qy, qz, ax, ay, az;
 
-    SerialPort stream = new SerialPort("COM4", 115200);
+    SerialPort stream = new SerialPort("COM3", 115200);
 
     
     public float speed;
@@ -24,7 +24,7 @@ public class gyroMove : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        serialController = GameObject.Find("SerialController").GetComponent<SerialController>();
+        //serialController = GameObject.Find("SerialController").GetComponent<SerialController>();
         stream.Open();
     }
 
@@ -39,6 +39,9 @@ public class gyroMove : MonoBehaviour
 
         message = stream.ReadLine();
         strData = message.Split(',');
+        //Debug.Log(message);
+
+        //Debug.Log(strData.Length);
 
         if (strData[0] != "" && strData[1] != "" && strData[2] != "" && strData[3] != "")//make sure data are ready, not empty
         {
@@ -64,7 +67,9 @@ public class gyroMove : MonoBehaviour
             //set our own rotation to be equal to a quaternion defined by these new values
             //reverse left/right and up/down
             //transform.rotation = new Quaternion(-qy, -qz, qx, qw);
-             transform.rotation = new Quaternion(-qx, -qz, -qy, qw);
+
+
+            transform.rotation = new Quaternion(-qx, -qz, -qy, qw);
 
              //movement
              // prevent 
