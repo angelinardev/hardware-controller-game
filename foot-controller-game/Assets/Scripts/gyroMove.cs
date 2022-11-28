@@ -8,18 +8,17 @@ public class gyroMove : MonoBehaviour
     public SerialController serialController;
 
     string message;
-    public string[] strData = new string[4]; //4 inputs
-    public string[] strData_received = new string[4];
-    public float qw, qx, qy, qz, ax, ay, az;
+    public string[] strData = new string[7]; //4 inputs
+    public string[] strData_received = new string[7];
+    public float qw, qx, qy, qz, ax;
 
-    SerialPort stream = new SerialPort("COM3", 115200);
+    int b1, b2, b3;
+
+    SerialPort stream = new SerialPort("COM4", 115200);
 
     
     public float speed;
 
-    float curr_offset_x = 0;
-    float curr_offset_y = 0.961f;
-    float curr_offset_z = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -50,6 +49,9 @@ public class gyroMove : MonoBehaviour
             strData_received[1] = strData[1];
             strData_received[2] = strData[2];
             strData_received[3] = strData[3];
+            strData_received[4] = strData[4];
+            strData_received[5] = strData[5];
+            strData_received[6] = strData[6];
             /* strData_received[4] = strData[4];
             strData_received[5] = strData[5];
             strData_received[6] = strData[6]; */
@@ -59,6 +61,9 @@ public class gyroMove : MonoBehaviour
             qx = float.Parse(strData_received[1]);
             qy = float.Parse(strData_received[2]);
             qz = float.Parse(strData_received[3]);
+            b1 = int.Parse(strData_received[4]);
+            b2 = int.Parse(strData_received[5]);
+            b3 = int.Parse(strData_received[6]);
            /*  ax = float.Parse(strData_received[4]);
             ay = float.Parse(strData_received[5]);
             az = float.Parse(strData_received[6]); */
@@ -84,6 +89,14 @@ public class gyroMove : MonoBehaviour
 
             transform.position += new Vector3(qy, 0, qx)*speed;
 
+            //handle button inputs
+            ButtonDetection();
+
         }   
+    }
+
+    void ButtonDetection()
+    {
+
     }
 }
