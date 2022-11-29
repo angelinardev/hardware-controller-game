@@ -16,15 +16,25 @@ public class gyroMove : MonoBehaviour
 
     SerialPort stream = new SerialPort("COM4", 115200);
 
+  public float jump = 5f;
     
     public float speed;
 
+     private float distanceToGround;
+     bool isGrounded = true;
+      Rigidbody rb;
 
+      PauseMenu menu;
+
+      bool isSpeeding = false;
     // Start is called before the first frame update
     void Start()
     {
         //serialController = GameObject.Find("SerialController").GetComponent<SerialController>();
         stream.Open();
+        distanceToGround = GetComponent<Collider>().bounds.extents.y;
+         rb = GetComponent<Rigidbody>();
+         menu = GetComponent<PauseMenu>();
     }
 
     // Update is called once per frame
@@ -87,16 +97,51 @@ public class gyroMove : MonoBehaviour
             curr_offset_y += 0;
             curr_offset_z +=qy; // The IMU module have value of z axis of 16600 caused by gravity */
 
+            //calculate speed
+            if (isSpeeding)
+                speed = 0.5f;
+            else
+                speed = 0.1f;
+
             transform.position += new Vector3(qy, 0, qx)*speed;
 
             //handle button inputs
             ButtonDetection();
+
+            //physics calcs
+            isGrounded = Physics.Raycast(transform.position, -Vector3.up, distanceToGround);
 
         }   
     }
 
     void ButtonDetection()
     {
+        //pause button
+        if (b1 ==1)
+         {   Debug.Log("Button 1 pressed");
+            menu.ChangeUI();
+         }
+        //speed button
+        if (b2 ==1)
+         {   Debug.Log("Button 2 pressed");
+            isSpeeding = !isSpeeding;
+         }
 
+        //jump button
+        if (b3 ==1)
+         {   
+            Debug.Log("Button 3 pressed");
+            Jump();
+         }
+
+    }
+    private void Jump()
+    {
+        if(isGrounded)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jump);
+            isGrounded = false;
+            Debug.Log("We jumped");
+        }
     }
 }
