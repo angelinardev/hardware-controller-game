@@ -7,10 +7,7 @@
 //		   - and altered FIFO retrieval sequence to avoid using blocking code
 //      2016-04-18 - Eliminated a potential infinite loop
 //      2013-05-08 - added seamless Fastwire support
-//                 - added note about gyd Yaw/Pitch/Roll output formats
-//      2012-06-04 - remove accel offset clearing for better results (thanks Sungon Lee)
-//      2012-06-01 - fixed gyro sensitivity to be 2000 deg/sec instead of 250
-//      2012-05-30 - basic DMP iro calibration
+//                 - added note about gyro calibration
 //      2012-06-21 - added note about Arduino 1.0.1 + Leonardo compatibility error
 //      2012-06-20 - improved FIFO overflow handling and simplified read process
 //      2012-06-19 - completely rearranged DMP initialization code and simplification
@@ -18,7 +15,10 @@
 //      2012-06-09 - fix broken FIFO read sequence and change interrupt detection to RISING
 //      2012-06-05 - add gravity-compensated initial reference frame acceleration output
 //                 - add 3D math helper file to DMP6 example sketch
-//                 - add Euler output annitialization working
+//                 - add Euler output and Yaw/Pitch/Roll output formats
+//      2012-06-04 - remove accel offset clearing for better results (thanks Sungon Lee)
+//      2012-06-01 - fixed gyro sensitivity to be 2000 deg/sec instead of 250
+//      2012-05-30 - basic DMP initialization working
 
 /* ============================================
 I2Cdev device library code is placed under the MIT license
@@ -121,6 +121,11 @@ MPU6050 mpu;
 #define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
 #define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 bool blinkState = false;
+
+//define variables for buttons/led
+int buttonState = 0;
+int buttonState2 = 0;
+int buttonState3 = 0;
 
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
@@ -241,6 +246,15 @@ void setup() {
 
     // configure LED for output
     pinMode(LED_PIN, OUTPUT);
+
+    //stuf for buttons
+    pinMode(12, INPUT);
+    pinMode(11, INPUT);
+    pinMode(10, INPUT);
+
+    pinMode(5, OUTPUT);
+    pinMode(4, OUTPUT);
+    pinMode(3, OUTPUT);
 }
 
 
@@ -259,16 +273,13 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
           //  Serial.print("quat\t");
           //CHANGE, USING QUATERNION
-          //adjust for offset
-          //q.w -=1.0;
-          //q.z += 0.01;
             Serial.print(q.w);
             Serial.print(",");
             Serial.print(q.x);
             Serial.print(",");
             Serial.print(q.y);
             Serial.print(",");
-            Serial.println(q.z);
+            Serial.print(q.z);
         #endif
 
         #ifdef OUTPUT_READABLE_EULER
@@ -344,7 +355,61 @@ void loop() {
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);
 
+        //for buttons
+        buttonState = digitalRead(12);
+        buttonState2 = digitalRead(11);
+        buttonState3 = digitalRead(10);
+
+      //we want number 3 to always be on, indicate power is on and connected
+      digitalWrite(3, LOW);
+        
+
+      //number 4 is connected to movement in the game, for now default is OFF
+       
+        digitalWrite(4, HIGH);
+        //this means we are moving in some way
+        if (q.x > 0.2 || q.x < -0.5 || q.y > 0.2 || q.y < -0.5|| q.z > 0.2)
+        {
+          digitalWrite(4, LOW);
+        }
+
+        //serial prints for our buttons. 1 means pressed, 0 means not pressed
+        if (buttonState == LOW)
+        {
+          Serial.print(",");
+          Serial.print(0);
+        }
+        else
+        {
+          Serial.print(",");
+          Serial.print(1);
+        }
+         if (buttonState2 == LOW)
+        {
+          Serial.print(",");
+          Serial.print(0);
+        }
+        else
+        {
+          Serial.print(",");
+          Serial.print(1);
+        }
+  
+      //number 5 is tied to this button press
+        if (buttonState3 == LOW)
+          {
+            Serial.print(",");
+            Serial.println(0);
+            digitalWrite(5, HIGH);
+          }
+        else
+          {
+            Serial.print(",");
+            Serial.println(1);
+            digitalWrite(5, LOW);
+          }
+
         //for unity, less data
-        delay(50);
+        delay(200);
     }
 }
