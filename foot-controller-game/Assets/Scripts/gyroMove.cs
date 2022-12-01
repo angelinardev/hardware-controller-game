@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO.Ports;
+using UnityEngine.UI;
 
 public class gyroMove : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class gyroMove : MonoBehaviour
     string message;
     public string[] strData = new string[7]; //4 inputs
     public string[] strData_received = new string[7];
-    public float qw, qx, qy, qz, ax;
+    public float qw, qx, qy, qz;
 
     int b1, b2, b3;
 
@@ -27,6 +28,11 @@ public class gyroMove : MonoBehaviour
       PauseMenu menu;
 
       bool isSpeeding = false;
+
+       private Vector3 targetVelocityLerp;
+        public float sensitivity, snappiness, maxForce;
+
+    public Image speedImage;
     // Start is called before the first frame update
     void Start()
     {
@@ -35,6 +41,7 @@ public class gyroMove : MonoBehaviour
         distanceToGround = GetComponent<Collider>().bounds.extents.y;
          rb = GetComponent<Rigidbody>();
          menu = GetComponent<PauseMenu>();
+         speedImage.enabled = false;
     }
 
     // Update is called once per frame
@@ -83,8 +90,9 @@ public class gyroMove : MonoBehaviour
             //reverse left/right and up/down
             //transform.rotation = new Quaternion(-qy, -qz, qx, qw);
 
-
-            transform.rotation = new Quaternion(-qx, -qz, -qy, qw);
+            rb.rotation = new Quaternion(-qx, -qz, -qy, qw);
+            //transform.rotation = new Quaternion(-qx, -qz, -qy, qw);
+            //transform.Rotate(new Vector3(-qx, -qz, -qy));
 
              //movement
              // prevent 
@@ -97,21 +105,37 @@ public class gyroMove : MonoBehaviour
             curr_offset_y += 0;
             curr_offset_z +=qy; // The IMU module have value of z axis of 16600 caused by gravity */
 
-            //calculate speed
-            if (isSpeeding)
-                speed = 0.5f;
-            else
-                speed = 0.1f;
-
-            transform.position += new Vector3(qy, 0, qx)*speed;
-
-            //handle button inputs
+             //handle button inputs
             ButtonDetection();
+            Speed();
 
+            //rb.Move(rb.position + new Vector3(qy, 0, qx)*speed, new Quaternion(-qx, -qz, -qy, qw));
+            //rb.velocity = new Vector3(qy, 0, qx)*speed;
+            //rb.position += new Vector3(qy, 0, qx)*speed*sensitivity;
+            //Move();
             //physics calcs
-            isGrounded = Physics.Raycast(transform.position, -Vector3.up, distanceToGround);
+            //isGrounded = Physics.Raycast(transform.position, -Vector3.up, distanceToGround);
 
         }   
+    }
+    private void FixedUpdate() {
+        
+            rb.velocity = new Vector3(qy, 0, qx)*speed;
+            //Move();
+            //physics calcs
+            isGrounded = Physics.Raycast(transform.position, -Vector3.up, distanceToGround);
+    }
+    void Speed()
+    {
+        //calculate speed
+            if (isSpeeding)
+            {    speed = 3.0f;
+                speedImage.enabled = true;
+            }
+            else
+            {    speed = 1.0f;
+                speedImage.enabled = false;
+            }
     }
 
     void ButtonDetection()
@@ -137,11 +161,33 @@ public class gyroMove : MonoBehaviour
     }
     private void Jump()
     {
-        if(isGrounded)
+        //if(isGrounded)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jump);
+           // rb.velocity = new Vector2(rb.velocity.x, jump);
+            //rb.velocity = new Vector3(qy, jump, qx)*speed;
+            rb.AddForce(new Vector3(0, jump, 0), ForceMode.VelocityChange);
             isGrounded = false;
             Debug.Log("We jumped");
         }
+    }
+    void Move()
+    {
+        //find target velocity
+        Vector3 currentVelocity = rb.velocity;
+        Vector3 targetVelocity = new Vector3(qy, 0, qx);
+        targetVelocity *=speed;
+
+        //align direction
+        targetVelocity = transform.TransformDirection(targetVelocity);
+        targetVelocityLerp = Vector3.Lerp(targetVelocityLerp, targetVelocity, snappiness); 
+
+        //calculate forces
+         Vector3 velocityChange = (targetVelocityLerp - currentVelocity); 
+        velocityChange = new Vector3(velocityChange.x, 0, velocityChange.z);
+
+        //limit force
+        Vector3.ClampMagnitude(velocityChange, maxForce);
+
+        rb.AddForce(velocityChange, ForceMode.VelocityChange);
     }
 }

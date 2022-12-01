@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -16,8 +17,17 @@ public class PauseMenu : MonoBehaviour
    {
         menuUI.enabled = !menuUI.enabled;
         if (menuUI.enabled)
-            Time.timeScale=1;
+           { 
+                Time.timeScale=0;
+           }
         else
-            Time.timeScale = 0;
+           { 
+                Time.timeScale = 1;
+           }
+   }
+
+   public void Restart()
+   {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
    }
 }
